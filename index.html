@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sourvis AI | Ambient Autonomous Desktop & Robotic Assistant</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Three.js CDN for 3D Robotics Preview -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        aws: {
+                            orange: '#FF9900',
+                            squid: '#232F3E',
+                            dark: '#0F172A',
+                            accent: '#00F0FF',
+                            purple: '#8B5CF6'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { boxShadow: '0 0 10px rgba(0, 240, 255, 0.2)' },
+                            '100%': { boxShadow: '0 0 25px rgba(0, 240, 255, 0.6)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0f1d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF9900;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .neon-border {
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-[#070b14] text-slate-100 font-sans min-h-screen selection:bg-aws-orange selection:text-black">
+
+    <!-- Top Navigation Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-amber-500 to-cyan-400 flex items-center justify-center font-black text-black shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-microchip text-lg"></i>
+                </div>
+                <div>
+                    <span class="font-extrabold text-lg tracking-wider text-white">SOURVIS<span class="text-aws-orange">.AI</span></span>
+                    <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-mono tracking-widest uppercase bg-cyan-950/80 text-cyan-300 rounded border border-cyan-800/60">Autonomous Core</span>
+                </div>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
+                <a href="#overview" class="hover:text-aws-orange transition-colors">Overview</a>
+                <a href="#superpowers" class="hover:text-aws-orange transition-colors">Superpowers</a>
+                <a href="#simulator" class="hover:text-aws-orange transition-colors flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Engine</a>
+                <a href="#robotics" class="hover:text-aws-orange transition-colors text-cyan-400">Robotics Chassis</a>
+                <a href="#architecture" class="hover:text-aws-orange transition-colors">Architecture</a>
+                <a href="#memory-graph" class="hover:text-aws-orange transition-colors">Memory Core</a>
+            </nav>
+
+            <div class="flex items-center space-x-3">
+                <a href="#simulator" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black shadow-md transition-all">
+                    <i class="fa-solid fa-terminal mr-1.5"></i> Test Simulator
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-24 pb-16">
+        <!-- Hero Section -->
+        <section id="overview" class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+            <div class="absolute inset-0 -z-10 flex items-center justify-center">
+                <div class="w-[500px] h-[500px] bg-gradient-to-tr from-cyan-600/15 to-amber-500/10 rounded-full blur-3xl opacity-70"></div>
+            </div>
+
+            <div class="text-center max-w-4xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-mono text-cyan-400 mb-6">
+                    <span class="w-2 h-2 rounded-full bg-aws-orange"></span>
+                    AWS Student Builder Challenge • Tech Superpower Submission
+                </div>
+                
+                <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white mb-6 leading-tight">
+                    Empathetic Ambient AI with <br class="hidden sm:inline">
+                    <span class="bg-gradient-to-r from-cyan-400 via-amber-300 to-orange-500 bg-clip-text text-transparent">
+                        Self-Evolution & Embodied Robotics
+                    </span>
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-300 leading-relaxed mb-8 max-w-3xl mx-auto">
+                    Engineered by <strong>Sourush</strong>. An autonomous pure-Python ambient companion that bridges high-speed local OS automation, long-term memory graphs, a 7-day autonomous code-refactoring loop, and physical robotic embodiment.
+                </p>
+
+                <!-- Core Badges -->
+                <div class="flex flex-wrap justify-center gap-3 text-xs font-mono mb-10">
+                    <div class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-2">
+                        <i class="fa-brands fa-python text-amber-400"></i> Pure Python Daemon
+                    </div>
+                    <div class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-rotate text-cyan-400"></i> 7-Day Self-Evolve Cycle
+                    </div>
+                    <div class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-robot text-purple-400"></i> Physical Hardware Chassis
+                    </div>
+                    <div class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-2">
+                        <i class="fa-brands fa-aws text-orange-400"></i> AWS Cloud Hosted
+                    </div>
+                </div>
+
+                <!-- Call to actions -->
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#simulator" class="px-6 py-3 rounded-xl font-bold text-sm bg-cyan-500 hover:bg-cyan-400 text-black shadow-lg shadow-cyan-500/25 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-play"></i> Launch Interactive Console
+                    </a>
+                    <a href="#robotics" class="px-6 py-3 rounded-xl font-bold text-sm bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-compass-drafting text-aws-orange"></i> View Robotics Lab
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Counter Panel -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-panel p-5 rounded-2xl border-slate-800 text-center">
+                    <div class="text-3xl font-extrabold text-cyan-400 font-mono" id="stat-interactions">271+</div>
+                    <div class="text-xs text-slate-400 mt-1 uppercase tracking-wider font-medium">Logged Interactions</div>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl border-slate-800 text-center">
+                    <div class="text-3xl font-extrabold text-amber-400 font-mono">7 Days</div>
+                    <div class="text-xs text-slate-400 mt-1 uppercase tracking-wider font-medium">Auto-Refactor Cycle</div>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl border-slate-800 text-center">
+                    <div class="text-3xl font-extrabold text-emerald-400 font-mono">180s</div>
+                    <div class="text-xs text-slate-400 mt-1 uppercase tracking-wider font-medium">Idle Context Autocomplete</div>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl border-slate-800 text-center">
+                    <div class="text-3xl font-extrabold text-purple-400 font-mono">4 Modes</div>
+                    <div class="text-xs text-slate-400 mt-1 uppercase tracking-wider font-medium">Passive / Active / Chat / Presentation</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Tech Superpower Section -->
+        <section id="superpowers" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800/80">
+            <div class="mb-12">
+                <span class="text-xs font-mono font-bold tracking-widest text-aws-orange uppercase">Autonomous Capabilities</span>
+                <h2 class="text-3xl font-extrabold text-white mt-1">Engineered Superpowers</h2>
+                <p class="text-slate-400 text-sm max-w-2xl mt-2">
+                    Unlike standard assistants that remain passive until commanded, Sourvis operates proactively across both software runtime and physical embodiment.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card 1: 7-Day Evolution -->
+                <div class="glass-panel p-6 rounded-2xl border-slate-800 hover:border-cyan-500/50 transition-all group">
+                    <div class="w-12 h-12 rounded-xl bg-cyan-950/80 border border-cyan-800/50 flex items-center justify-center text-cyan-400 mb-5 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-code-compare text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">7-Day Self-Evolving Code</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                        Sourvis runs weekly internal telemetry audits. Through its <code class="text-cyan-300 font-mono">self_evolve.py</code> pipeline, it proposes, validates against syntax regressions, and applies code refactoring updates dynamically.
+                    </p>
+                    <div class="bg-black/50 p-2.5 rounded-lg border border-slate-800 text-[11px] font-mono text-cyan-300">
+                        <code>intent: "self_rewrite" -> candidate validation -> auto backup</code>
+                    </div>
+                </div>
+
+                <!-- Card 2: 3-Min Inactivity Auto-Type -->
+                <div class="glass-panel p-6 rounded-2xl border-slate-800 hover:border-amber-500/50 transition-all group">
+                    <div class="w-12 h-12 rounded-xl bg-amber-950/80 border border-amber-800/50 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-keyboard text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">3-Minute Inactivity Assist</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                        A persistent daemon monitors keystroke velocity. If a developer stalls for 180 seconds during deep work, Sourvis reads active IDE buffers and automatically synthesizes candidate code or documentation.
+                    </p>
+                    <div class="bg-black/50 p-2.5 rounded-lg border border-slate-800 text-[11px] font-mono text-amber-300">
+                        <code>idle_timer >= 180s -> infer context -> prompt preview</code>
+                    </div>
+                </div>
+
+                <!-- Card 3: Physical Body & Robotics -->
+                <div class="glass-panel p-6 rounded-2xl border-slate-800 hover:border-purple-500/50 transition-all group">
+                    <div class="w-12 h-12 rounded-xl bg-purple-950/80 border border-purple-800/50 flex items-center justify-center text-purple-400 mb-5 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-robot text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Physical Robotics Embodiment</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                        Transitioning from desktop daemon to tangible presence. Powered by dual-axis micro servos, ESP32 telemetry, and spatial ultrasonic sensors to physically orient towards the user during speech.
+                    </p>
+                    <div class="bg-black/50 p-2.5 rounded-lg border border-slate-800 text-[11px] font-mono text-purple-300">
+                        <code>kinematics: pan/tilt servos -> spatial presence -> status OLED</code>
+                    </div>
+                </div>
+
+                <!-- Card 4: Persistent Memory & Contacts -->
+                <div class="glass-panel p-6 rounded-2xl border-slate-800 hover:border-emerald-500/50 transition-all group">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-950/80 border border-emerald-800/50 flex items-center justify-center text-emerald-400 mb-5 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-brain text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Contextual Memory Engine</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                        Remembers key contacts, personal relationships (e.g., Best Friend "Night"), favorite songs (Humsafar - Saiyaara), and daily mood states across reboots via structured JSON context graphs.
+                    </p>
+                </div>
+
+                <!-- Card 5: OS & Office Automation -->
+                <div class="glass-panel p-6 rounded-2xl border-slate-800 hover:border-blue-500/50 transition-all group">
+                    <div class="w-12 h-12 rounded-xl bg-blue-950/80 border border-blue-800/50 flex items-center justify-center text-blue-400 mb-5 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-file-powerpoint text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Direct Office & Shell Control</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                        Generates complete multi-slide PowerPoint decks, formula-rich Excel workbooks, and formatted research papers directly through Python scripts without requiring a graphical suite.
+                    </p>
+                </div>
+
+                <!-- Card 6: Zero-Friction Phone Bridge -->
+                <div class="glass-panel p-6 rounded-2xl border-slate-800 hover:border-pink-500/50 transition-all group">
+                    <div class="w-12 h-12 rounded-xl bg-pink-950/80 border border-pink-800/50 flex items-center justify-center text-pink-400 mb-5 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-mobile-screen-button text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Voice Call & Phone Bridge</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed mb-4">
+                        Prepares SMS drafts, opens device dialing protocols via URI schemes (<code class="text-pink-300 font-mono">tel:</code>, <code class="text-pink-300 font-mono">sms:</code>), and triggers authorized emergency or quick-contact actions smoothly.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Interactive Simulation Sandbox -->
+        <section id="simulator" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800/80">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+                <div>
+                    <span class="text-xs font-mono font-bold tracking-widest text-cyan-400 uppercase">Live Interactive Testbench</span>
+                    <h2 class="text-3xl font-extrabold text-white mt-1">Sourvis Core Agent Simulator</h2>
+                    <p class="text-slate-400 text-sm max-w-xl mt-1">
+                        Try prompt commands directly. This simulator mirrors the deterministic <code class="text-cyan-300">action_registry.py</code> and <code class="text-cyan-300">actions.py</code> pipeline from the native Python daemon.
+                    </p>
+                </div>
+                <!-- Mode Status Pills -->
+                <div class="flex items-center gap-2 font-mono text-xs">
+                    <span class="text-slate-400">Current Mode:</span>
+                    <span id="simulator-mode-badge" class="px-3 py-1 rounded-full bg-cyan-950 border border-cyan-800 text-cyan-300 font-bold">conversation</span>
+                </div>
+            </div>
+
+            <!-- Terminal Window -->
+            <div class="glass-panel rounded-2xl border border-slate-700/80 shadow-2xl overflow-hidden">
+                <!-- Terminal Header Bar -->
+                <div class="bg-slate-900/90 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                        <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                        <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                        <span class="text-xs font-mono text-slate-400 ml-2">sourvis_daemon@sourush-pc: ~/core/agent.py</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>DAEMON ONLINE</span>
+                    </div>
+                </div>
+
+                <!-- Terminal Output Buffer -->
+                <div id="terminal-screen" class="p-6 font-mono text-xs sm:text-sm h-80 overflow-y-auto space-y-3 bg-[#060911]">
+                    <div class="text-slate-500"># Sourvis Ambient Agent initialization complete.</div>
+                    <div class="text-slate-500"># Memory graph loaded from memory.json (Owner: Sourush, Best Friend: Night).</div>
+                    <div class="text-cyan-400">Sourvis is ready. Good evening. Say Sourvis or type a command to begin.</div>
+                </div>
+
+                <!-- Suggested Commands Pills -->
+                <div class="px-6 py-2.5 bg-slate-950/70 border-t border-slate-800/60 flex items-center gap-2 overflow-x-auto text-[11px] font-mono">
+                    <span class="text-slate-500 whitespace-nowrap">Suggested:</span>
+                    <button onclick="injectCommand('play favorite song')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition-colors">play favorite song</button>
+                    <button onclick="injectCommand('simulate 3 min typing stall')" class="px-2.5 py-1 rounded bg-amber-950/70 border border-amber-800/50 hover:bg-amber-900/80 text-amber-300 whitespace-nowrap transition-colors">simulate 3 min typing stall</button>
+                    <button onclick="injectCommand('trigger 7-day self evolution')" class="px-2.5 py-1 rounded bg-cyan-950/70 border border-cyan-800/50 hover:bg-cyan-900/80 text-cyan-300 whitespace-nowrap transition-colors">trigger 7-day self evolution</button>
+                    <button onclick="injectCommand('recall memory')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition-colors">recall memory</button>
+                    <button onclick="injectCommand('create presentation on Quantum AI')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition-colors">create presentation on Quantum AI</button>
+                </div>
+
+                <!-- Input Field -->
+                <form id="terminal-form" onsubmit="handleCommandSubmit(event)" class="p-4 bg-slate-900/90 border-t border-slate-800 flex items-center gap-3">
+                    <span class="text-cyan-400 font-mono font-bold pl-2">&gt;</span>
+                    <input type="text" id="terminal-input" placeholder="Type a command (e.g. 'call night', 'status', 'lock system', 'play favorite song')..." 
+                        class="flex-1 bg-transparent text-white font-mono text-xs sm:text-sm focus:outline-none placeholder-slate-500">
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs font-mono transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane text-[10px]"></i> Execute
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 3D Robotics Chassis & Hardware Preview -->
+        <section id="robotics" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800/80">
+            <div class="mb-8">
+                <span class="text-xs font-mono font-bold tracking-widest text-purple-400 uppercase">Hardware Engineering Lab</span>
+                <h2 class="text-3xl font-extrabold text-white mt-1">Physical Embodiment & Robotic Companion</h2>
+                <p class="text-slate-400 text-sm max-w-2xl mt-1">
+                    Sourvis is evolving from a Python desktop daemon into a physical desktop robot. Explore the 3D kinetic head unit model below and test servo articulation in real time.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- 3D Canvas Box -->
+                <div class="lg:col-span-7 glass-panel rounded-2xl border-slate-800 p-2 relative overflow-hidden group">
+                    <div class="absolute top-4 left-4 z-10 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700/80 text-[11px] font-mono text-purple-300 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-purple-400 animate-ping"></span>
+                        3D KINETIC VIEWPORT • DRAG TO ROTATE
+                    </div>
+
+                    <!-- WebGL Canvas Container -->
+                    <div id="threejs-container" class="w-full h-80 sm:h-96 rounded-xl bg-[#030712] cursor-grab active:cursor-grabbing flex items-center justify-center">
+                        <!-- Canvas injected here via Three.js -->
+                    </div>
+
+                    <!-- Live Servo Controls Bar -->
+                    <div class="p-4 bg-slate-900/80 rounded-xl mt-2 border border-slate-800 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+                        <div class="flex items-center gap-3">
+                            <span class="text-slate-400">Head Tilt Servo:</span>
+                            <input type="range" id="servo-tilt" min="-30" max="30" value="0" class="w-24 accent-purple-500 cursor-pointer" oninput="updateRobotTilt(this.value)">
+                            <span id="tilt-val" class="text-purple-300 w-8">0°</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-slate-400">Pan Servo:</span>
+                            <input type="range" id="servo-pan" min="-60" max="60" value="0" class="w-24 accent-cyan-500 cursor-pointer" oninput="updateRobotPan(this.value)">
+                            <span id="pan-val" class="text-cyan-300 w-8">0°</span>
+                        </div>
+                        <button onclick="triggerRobotNod()" class="px-3 py-1.5 rounded bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-700/50 transition-colors">
+                            <i class="fa-solid fa-angles-down mr-1"></i> Nod Head
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hardware Specifications -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="glass-panel p-5 rounded-2xl border-slate-800">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-8 h-8 rounded-lg bg-purple-950 flex items-center justify-center text-purple-400">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                            <h4 class="font-bold text-white text-sm">Microcontroller & Telemetry</h4>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            ESP32-S3 Dual-Core microcontroller operating serial bridge with Python agent. Communicates via custom JSON packets to trigger spatial head tracking when wake word is detected.
+                        </p>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-2xl border-slate-800">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-8 h-8 rounded-lg bg-cyan-950 flex items-center justify-center text-cyan-400">
+                                <i class="fa-solid fa-eye"></i>
+                            </div>
+                            <h4 class="font-bold text-white text-sm">OLED Animated Expressive Eyes</h4>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Dual 0.96" SSD1306 OLED displays showing dynamic eye gestures (blinking, curiosity squint, thinking whirl, empathy glow) matched with voice intent.
+                        </p>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-2xl border-slate-800">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-8 h-8 rounded-lg bg-amber-950 flex items-center justify-center text-amber-400">
+                                <i class="fa-solid fa-gears"></i>
+                            </div>
+                            <h4 class="font-bold text-white text-sm">Modular 3D Printed Chassis</h4>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Custom PLA/PETG modular body designed in CAD with internal cable channels, dual SG90 servo bays, and acoustic resonant chamber for microphone pickup.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Memory Core & Context Graph Viewer -->
+        <section id="memory-graph" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800/80">
+            <div class="mb-8">
+                <span class="text-xs font-mono font-bold tracking-widest text-emerald-400 uppercase">Long-Term Persistence</span>
+                <h2 class="text-3xl font-extrabold text-white mt-1">Live Memory Core (memory.json)</h2>
+                <p class="text-slate-400 text-sm max-w-xl mt-1">
+                    Real state representation queried by <code class="text-emerald-300">context.py</code> and <code class="text-emerald-300">memory.py</code> to preserve user relationships and preferences.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Personal Graph -->
+                <div class="glass-panel p-5 rounded-2xl border-slate-800">
+                    <h3 class="text-sm font-bold text-emerald-400 font-mono mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-user-tag"></i> Profile & Inner Circle
+                    </h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between items-center py-2 border-b border-slate-800">
+                            <span class="text-slate-400">Primary Owner:</span>
+                            <span class="font-mono text-white font-bold">Sourush</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-800">
+                            <span class="text-slate-400">Best Friend:</span>
+                            <span class="font-mono text-cyan-300 font-bold">Night</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-800">
+                            <span class="text-slate-400">Verified Phone:</span>
+                            <span class="font-mono text-slate-300">+91 8580548709</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-slate-400">Calling Flow:</span>
+                            <span class="font-mono text-amber-300">SMS Pre-Notification Ready</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferences & Context -->
+                <div class="glass-panel p-5 rounded-2xl border-slate-800">
+                    <h3 class="text-sm font-bold text-cyan-400 font-mono mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-heart"></i> Emotional Anchors
+                    </h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between items-center py-2 border-b border-slate-800">
+                            <span class="text-slate-400">Favorite Track:</span>
+                            <span class="font-mono text-amber-300 font-bold">Humsafar - Saiyaara</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-800">
+                            <span class="text-slate-400">User Mood State:</span>
+                            <span class="font-mono text-emerald-400">Focused / Productive</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-800">
+                            <span class="text-slate-400">Language Mode:</span>
+                            <span class="font-mono text-white">English + Hinglish Nuances</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-slate-400">Active Task Profile:</span>
+                            <span class="font-mono text-purple-400">coding (VSCode daemon)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fact Vectors -->
+                <div class="glass-panel p-5 rounded-2xl border-slate-800">
+                    <h3 class="text-sm font-bold text-amber-400 font-mono mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-database"></i> Stored Long-Term Facts
+                    </h3>
+                    <ul class="space-y-2 text-xs font-mono text-slate-300">
+                        <li class="p-2 rounded bg-slate-900/60 border border-slate-800 flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                            <span>"Night is best friend; user communicates in Hinglish"</span>
+                        </li>
+                        <li class="p-2 rounded bg-slate-900/60 border border-slate-800 flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                            <span>"Upcoming sync meeting scheduled with Shubham"</span>
+                        </li>
+                        <li class="p-2 rounded bg-slate-900/60 border border-slate-800 flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                            <span>"Autonomy fallback policy: never empty recycle bin"</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- System Architecture Breakdown -->
+        <section id="architecture" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800/80">
+            <div class="mb-8">
+                <span class="text-xs font-mono font-bold tracking-widest text-aws-orange uppercase">Architecture & Modularity</span>
+                <h2 class="text-3xl font-extrabold text-white mt-1">Under the Hood: Native Python Engine</h2>
+                <p class="text-slate-400 text-sm max-w-2xl mt-1">
+                    Structured for ultra-low latency, complete modularity, and zero intrusive UI baggage.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 font-mono text-xs">
+                    <div class="text-cyan-400 font-bold mb-1 flex items-center gap-1.5">
+                        <i class="fa-brands fa-python"></i> main.py
+                    </div>
+                    <p class="text-slate-400 text-[11px] leading-relaxed">
+                        Multithreaded voice listener, speech recognition fallbacks, idle timer thread, and wake word interceptor.
+                    </p>
+                </div>
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 font-mono text-xs">
+                    <div class="text-purple-400 font-bold mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-network-wired"></i> brain.py
+                    </div>
+                    <p class="text-slate-400 text-[11px] leading-relaxed">
+                        Strict JSON schema output parsing, Groq LLM inference, pronoun resolution, and empathetic persona tuning.
+                    </p>
+                </div>
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 font-mono text-xs">
+                    <div class="text-amber-400 font-bold mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-gears"></i> action_registry.py
+                    </div>
+                    <p class="text-slate-400 text-[11px] leading-relaxed">
+                        Deterministic map of registered OS actions: document synthesis, multimedia control, battery, and process trees.
+                    </p>
+                </div>
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 font-mono text-xs">
+                    <div class="text-emerald-400 font-bold mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-code-branch"></i> self_evolve.py
+                    </div>
+                    <p class="text-slate-400 text-[11px] leading-relaxed">
+                        7-day code audit, AST syntax checking, rollback protection, and continuous runtime patching.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- AWS Deployment & Cloud Stack -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800/80">
+            <div class="glass-panel p-8 rounded-3xl border border-amber-500/20 relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-aws-orange/10 rounded-full blur-3xl"></div>
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-xs font-mono text-amber-400 mb-3">
+                            <i class="fa-brands fa-aws"></i> AWS Cloud Infrastructure
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Deployed on AWS Cloud</h3>
+                        <p class="text-slate-300 text-xs sm:text-sm max-w-xl leading-relaxed">
+                            This portfolio and telemetry console are deployed globally using AWS hosting infrastructure (AWS Amplify / Amazon S3 + CloudFront CDN), guaranteeing high availability and sub-millisecond edge response times for competition evaluation.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-center p-4 rounded-xl bg-slate-950/80 border border-slate-800">
+                            <i class="fa-brands fa-aws text-3xl text-aws-orange mb-1"></i>
+                            <div class="text-[11px] font-mono text-slate-400">AWS Amplify</div>
+                        </div>
+                        <div class="text-center p-4 rounded-xl bg-slate-950/80 border border-slate-800">
+                            <i class="fa-solid fa-shield-halved text-3xl text-cyan-400 mb-1"></i>
+                            <div class="text-[11px] font-mono text-slate-400">IAM & Security</div>
+                        </div>
+                        <div class="text-center p-4 rounded-xl bg-slate-950/80 border border-slate-800">
+                            <i class="fa-solid fa-bolt text-3xl text-amber-400 mb-1"></i>
+                            <div class="text-[11px] font-mono text-slate-400">CloudFront CDN</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 py-8 bg-[#040811] text-xs font-mono text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Sourvis AI • Created by Sourush • Built for AWS Student Builder Challenge</span>
+            </div>
+            <div>
+                <span>Python 3.11+ • Three.js WebGL • Autonomous Daemon</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Scripting -->
+    <script>
+        // State and Local Store
+        let assistantMode = "conversation";
+        let interactionCount = 271;
+
+        // Terminal Output Logger
+        function logToTerminal(type, text) {
+            const screen = document.getElementById('terminal-screen');
+            const entry = document.createElement('div');
+            
+            if (type === 'user') {
+                entry.className = 'text-white flex items-start gap-2';
+                entry.innerHTML = `<span class="text-slate-500 font-bold">&gt;</span> <span>${text}</span>`;
+            } else if (type === 'system') {
+                entry.className = 'text-slate-500 italic';
+                entry.innerText = `# ${text}`;
+            } else if (type === 'sourvis') {
+                entry.className = 'text-cyan-300 bg-cyan-950/30 p-2.5 rounded-lg border-l-2 border-cyan-400';
+                entry.innerHTML = `<span class="font-bold text-cyan-400">Sourvis:</span> ${text}`;
+            } else if (type === 'action') {
+                entry.className = 'text-amber-300 font-mono text-xs bg-amber-950/20 p-2 rounded border border-amber-900/50';
+                entry.innerHTML = `<i class="fa-solid fa-bolt mr-1"></i> ${text}`;
+            } else if (type === 'robot') {
+                entry.className = 'text-purple-300 font-mono text-xs bg-purple-950/30 p-2 rounded border border-purple-900/50';
+                entry.innerHTML = `<i class="fa-solid fa-robot mr-1"></i> ${text}`;
+            }
+            
+            screen.appendChild(entry);
+            screen.scrollTop = screen.scrollHeight;
+
+            // Increment interaction stats
+            interactionCount++;
+            document.getElementById('stat-interactions').innerText = `${interactionCount}+`;
+        }
+
+        // Suggested Command Injection
+        function injectCommand(cmd) {
+            document.getElementById('terminal-input').value = cmd;
+            handleCommandSubmit(new Event('submit'));
+        }
+
+        // Terminal Command Processing Engine (Mirroring Python brain.py & actions.py)
+        function handleCommandSubmit(e) {
+            e.preventDefault();
+            const inputEl = document.getElementById('terminal-input');
+            const command = inputEl.value.trim();
+            if (!command) return;
+
+            logToTerminal('user', command);
+            inputEl.value = '';
+
+            const low = command.toLowerCase();
+
+            // Simulate deterministic responses from user's Python codebase
+            setTimeout(() => {
+                if (low.includes('favorite song') || low.includes('play music') || low.includes('saiyaara') || low.includes('humsafar')) {
+                    logToTerminal('action', 'ACTION_MAP["play_music"] triggered: Track="Humsafar - Saiyaara"');
+                    logToTerminal('sourvis', 'Playing your favorite track: "Humsafar - Saiyaara", boss.');
+                    triggerRobotNod();
+                } else if (low.includes('3 min') || low.includes('stall') || low.includes('auto type')) {
+                    logToTerminal('system', 'Keypress listener: Delta = 182.4s idle detected (threshold 180s)');
+                    logToTerminal('action', 'Context inference reading active workspace buffer...');
+                    logToTerminal('sourvis', 'I noticed you paused for 3 minutes on the robotics kinematics loop. I have prepared the velocity calculation candidate: [apply_candidate(kinematics_patch_v2)].');
+                } else if (low.includes('7-day') || low.includes('evolution') || low.includes('self rewrite') || low.includes('self evolve')) {
+                    logToTerminal('system', 'Chronological trigger: 7-day self-evolution cycle active.');
+                    logToTerminal('action', 'generate_rewrite("brain.py", "optimize latency & AST validation")');
+                    logToTerminal('sourvis', 'I generated a syntax-checked candidate for brain.py. Reviewing AST tree... 0 regressions found. Candidate backup ready.');
+                } else if (low.includes('call night') || low.includes('night')) {
+                    logToTerminal('action', 'call_saved_contact_now("Night") -> phone: +918580548709');
+                    logToTerminal('sourvis', 'I prepared a text message to Night: "Hey Night, Sourush wants to talk. Calling you now." Tap Send in the messaging app, then say message sent and I’ll open her call screen.');
+                } else if (low.includes('recall') || low.includes('memory') || low.includes('who are you')) {
+                    logToTerminal('action', 'build_memory_context() queried from memory.json');
+                    logToTerminal('sourvis', 'Here is what I remember: You are Sourush. Your best friend is Night (+918580548709). Your favorite track is Humsafar - Saiyaara. Upcoming sync with Shubham.');
+                } else if (low.includes('presentation') || low.includes('ppt') || low.includes('quantum')) {
+                    logToTerminal('action', 'create_office_document("powerpoint", "Quantum AI") -> PPTX generated with 7 slides');
+                    logToTerminal('sourvis', 'I created and opened your PowerPoint presentation: C:\\Users\\Sourush\\Documents\\Sourvis Creations\\Quantum_AI.pptx');
+                } else if (low.includes('status')) {
+                    logToTerminal('sourvis', `Sourvis status: Active Daemon running. Speech mode: Google Speech + Whisper fallback. Language service: Groq configured. Current mode: ${assistantMode}. Robotics serial: ONLINE.`);
+                } else if (low.includes('lock') || low.includes('shutdown')) {
+                    logToTerminal('action', 'system.lock_system() dispatched');
+                    logToTerminal('sourvis', 'Workstation lock sequence initiated, boss.');
+                } else {
+                    logToTerminal('sourvis', `Acknowledged: "${command}". Context logged into active session memory graph.`);
+                }
+            }, 300);
+        }
+
+        // ==========================================
+        // Three.js Interactive 3D Robotics Head Unit
+        // ==========================================
+        let scene, camera, renderer, robotHead, leftEye, rightEye, antennaGroup;
+        let isDragging = false;
+        let prevMousePos = { x: 0, y: 0 };
+
+        function initRoboticsViewport() {
+            const container = document.getElementById('threejs-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x060913);
+
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(0, 0, 7);
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0x00f0ff, 2, 50);
+            pointLight.position.set(5, 5, 5);
+            scene.add(pointLight);
+
+            const purpleLight = new THREE.PointLight(0x8b5cf6, 2, 50);
+            purpleLight.position.set(-5, -3, 3);
+            scene.add(purpleLight);
+
+            // Robot Head Group (Base for pan/tilt)
+            robotHead = new THREE.Group();
+
+            // Head Chassis (Rounded Main Shell)
+            const headGeometry = new THREE.BoxGeometry(2.4, 2.0, 1.8);
+            const headMaterial = new THREE.MeshStandardMaterial({
+                color: 0x1e293b,
+                roughness: 0.3,
+                metalness: 0.8
+            });
+            const headMesh = new THREE.Mesh(headGeometry, headMaterial);
+            headMesh.castShadow = true;
+            robotHead.add(headMesh);
+
+            // Front Visor Screen (Simulating OLED display bezel)
+            const visorGeo = new THREE.PlaneGeometry(1.9, 1.1);
+            const visorMat = new THREE.MeshBasicMaterial({ color: 0x020617 });
+            const visor = new THREE.Mesh(visorGeo, visorMat);
+            visor.position.set(0, 0.1, 0.91);
+            robotHead.add(visor);
+
+            // Dual OLED Animated Eyes
+            const eyeGeo = new THREE.PlaneGeometry(0.45, 0.25);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+            
+            leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+            leftEye.position.set(-0.45, 0.1, 0.92);
+            robotHead.add(leftEye);
+
+            rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+            rightEye.position.set(0.45, 0.1, 0.92);
+            robotHead.add(rightEye);
+
+            // Decorative Antenna & Telemetry Ears
+            antennaGroup = new THREE.Group();
+            const earGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.4, 16);
+            const earMat = new THREE.MeshStandardMaterial({ color: 0x8b5cf6, metalness: 0.9 });
+
+            const leftEar = new THREE.Mesh(earGeo, earMat);
+            leftEar.rotation.z = Math.PI / 2;
+            leftEar.position.set(-1.3, 0.2, 0);
+            antennaGroup.add(leftEar);
+
+            const rightEar = new THREE.Mesh(earGeo, earMat);
+            rightEar.rotation.z = Math.PI / 2;
+            rightEar.position.set(1.3, 0.2, 0);
+            antennaGroup.add(rightEar);
+
+            robotHead.add(antennaGroup);
+
+            // Neck Swivel Mount
+            const neckGeo = new THREE.CylinderGeometry(0.4, 0.5, 0.6, 20);
+            const neckMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9 });
+            const neck = new THREE.Mesh(neckGeo, neckMat);
+            neck.position.set(0, -1.2, 0);
+            robotHead.add(neck);
+
+            scene.add(robotHead);
+
+            // Mouse Drag Listeners for 3D Orbiting
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                prevMousePos = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mouseup', () => { isDragging = false; });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - prevMousePos.x;
+                const deltaY = e.clientY - prevMousePos.y;
+
+                robotHead.rotation.y += deltaX * 0.01;
+                robotHead.rotation.x += deltaY * 0.01;
+
+                prevMousePos = { x: e.clientX, y: e.clientY };
+            });
+
+            // Touch events for mobile compatibility
+            container.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchend', () => { isDragging = false; });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isDragging || e.touches.length !== 1) return;
+                const deltaX = e.touches[0].clientX - prevMousePos.x;
+                const deltaY = e.touches[0].clientY - prevMousePos.y;
+
+                robotHead.rotation.y += deltaX * 0.01;
+                robotHead.rotation.x += deltaY * 0.01;
+
+                prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }, { passive: true });
+
+            // Responsive Window Resize Handler
+            window.addEventListener('resize', onWindowResize);
+
+            // Animation Loop
+            function animateLoop(time) {
+                requestAnimationFrame(animateLoop);
+
+                // Subtle organic idle breathing motion when not manually dragged
+                if (!isDragging) {
+                    robotHead.position.y = Math.sin(time * 0.002) * 0.06;
+                }
+
+                // Random eye blink simulation
+                if (Math.random() < 0.005) {
+                    leftEye.scale.y = 0.1;
+                    rightEye.scale.y = 0.1;
+                    setTimeout(() => {
+                        leftEye.scale.y = 1.0;
+                        rightEye.scale.y = 1.0;
+                    }, 120);
+                }
+
+                renderer.render(scene, camera);
+            }
+
+            animateLoop(0);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('threejs-container');
+            if (!container || !renderer || !camera) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // Servo Slider Control Hooks
+        function updateRobotTilt(val) {
+            document.getElementById('tilt-val').innerText = `${val}°`;
+            if (robotHead) {
+                robotHead.rotation.x = -THREE.MathUtils.degToRad(val);
+            }
+        }
+
+        function updateRobotPan(val) {
+            document.getElementById('pan-val').innerText = `${val}°`;
+            if (robotHead) {
+                robotHead.rotation.y = THREE.MathUtils.degToRad(val);
+            }
+        }
+
+        function triggerRobotNod() {
+            if (!robotHead) return;
+            const originalTilt = robotHead.rotation.x;
+            let step = 0;
+            const nodInterval = setInterval(() => {
+                step++;
+                robotHead.rotation.x = originalTilt + Math.sin(step * 0.4) * 0.25;
+                if (step > 15) {
+                    clearInterval(nodInterval);
+                    robotHead.rotation.x = originalTilt;
+                }
+            }, 25);
+            logToTerminal('robot', 'Kinematic servo head nod dispatched (ESP32 UART packet synced).');
+        }
+
+        // Initialize Three.js on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            initRoboticsViewport();
+        });
+    </script>
+</body>
+</html>
